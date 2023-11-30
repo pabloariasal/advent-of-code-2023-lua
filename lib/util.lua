@@ -12,4 +12,5 @@ function M.dump(o)
       return tostring(o)
    end
 end
+
 return M

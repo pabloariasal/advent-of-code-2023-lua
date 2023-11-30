@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: run <dayXY> [options]"
+    exit 1
+fi
+
+day="$1"
+shift
+lua_args="$@"
+
+export LUA_PATH="lib/?.lua;;"
+
+if [ -z "$lua_args" ]; then
+    lua "${day}/solution.lua" "${day}/input.txt"
+else
+    lua "$lua_args" -- "${day}/solution.lua" "${day}/input.txt"
+fi
