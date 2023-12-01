@@ -41,4 +41,8 @@ function M.reduce(sequence, operator, init)
     return out
 end
 
+function M.sum(a, b)
+    return a + b
+end
+
 return M
