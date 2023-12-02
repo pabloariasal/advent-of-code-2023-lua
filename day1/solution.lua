@@ -1,7 +1,6 @@
 local util = require 'util'
 local fun = require 'functional'
 
-
 local function part1()
    local codes = { }
    local lines = io.lines(arg[1])
@@ -20,7 +19,7 @@ local function part1()
 end
 
 local p1 = part1()
-print(p1)
+print("Part 1: " .. p1)
 assert(55607 == p1)
 
 local nums = {['one'] = 1,
@@ -66,7 +65,7 @@ function part2()
 end
 
 local p2 = part2()
-print(p2)
+print("Part 2:" .. p2)
 assert(55607 == p2)
 
 -- Tests

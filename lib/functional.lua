@@ -45,4 +45,8 @@ function M.sum(a, b)
     return a + b
 end
 
+function M.mult(a, b)
+    return a * b
+end
+
 return M
