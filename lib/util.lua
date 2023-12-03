@@ -13,4 +13,12 @@ function M.dump(o)
    end
 end
 
+function M.insert_all(t, l)
+   local result = t
+   for _,v in ipairs(l) do
+      table.insert(result, v)
+   end
+   return result
+end
+
 return M

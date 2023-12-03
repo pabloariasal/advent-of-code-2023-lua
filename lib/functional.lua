@@ -15,6 +15,7 @@ function M.filter(sequence, predicate)
             table.insert(newlist, v)
        end
     end
+    return newlist
 end
 
 function M.partition(sequence, predicate)

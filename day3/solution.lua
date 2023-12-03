@@ -13,6 +13,10 @@ local function isDollar(str)
     return (str:find('^%$') ~= nil)
 end
 
+local function isStar(str)
+    return (str:find('^%*') ~= nil)
+end
+
 local function isSymbol(str)
     return not isDigit(str) and not isPoint(str) or isDollar(str)
 end
@@ -62,156 +66,177 @@ local function test_is_symbol()
     end
 end
 
-local function count_neighbors_matching(col, current_line, prev_line, next_line, pred)
-    local cols = { col - 1, col, col + 1 }
-    local count = 0
-    for _, c in ipairs(cols) do
-        if (c > 0) and (c <= #current_line) then
-            if prev_line ~= nil and pred(string.sub(prev_line, c, c)) then
-                count = count + 1
-            end
-            if next_line ~= nil and pred(string.sub(next_line, c, c)) then
-                count = count + 1
-            end
-            if pred(string.sub(current_line, c, c)) then
-                count = count + 1
-            end
-        end
-    end
-    return count
-end
-
-local function has_symbol_as_neighbor(col, current_line, prev_line, next_line)
-    return count_neighbors_matching(col, current_line, prev_line, next_line, isSymbol) > 0
-end
-
--- Tests
-
-local function test_has_symbol_as_neighbor()
-    local testcases = {
-        { current = '123', col = 1, prev = nil,   next = nil,   expected = false },
-        { current = '12+', col = 1, prev = nil,   next = nil,   expected = false },
-        { current = '12+', col = 2, prev = nil,   next = nil,   expected = true },
-        { current = '123', col = 1, prev = '+34', next = nil,   expected = true },
-        { current = '123', col = 2, prev = '+34', next = nil,   expected = true },
-        { current = '123', col = 3, prev = '+34', next = nil,   expected = false },
-        { current = '123', col = 3, prev = '345', next = '+78', expected = false },
-        { current = '123', col = 2, prev = '666', next = '+78', expected = true },
-        { current = '123', col = 1, prev = '666', next = '+78', expected = true },
-    }
-    for _, t in ipairs(testcases) do
-        local actual = has_symbol_as_neighbor(t.col, t.current, t.prev, t.next)
-        assert(actual == t.expected, util.dump(t))
-    end
-end
-
-local function matching_numbers_in_line(current_line, prev_line, next_line, pred)
+local function extract_numbers_and_symbols_from_line(line, line_number)
     local numbers = {}
+    local symbols = {}
 
     local number_start = nil
     local number_end = nil
-    local is_adjacent = false
-    for j = 1, #current_line do
-        local current_char = string.sub(current_line, j, j)
+    for j = 1, #line do
+        local current_char = string.sub(line, j, j)
         if isDigit(current_char) then
             if number_start == nil then
                 -- starting a new number
                 number_start = j
             end
             number_end = j
-            if not is_adjacent and pred(j, current_line, prev_line, next_line) then
-                is_adjacent = true
-            end
         else
-            if (number_start ~= nil) and is_adjacent then
+            if (number_start ~= nil) then
                 -- ending a number
-                table.insert(numbers, tonumber(string.sub(current_line, number_start, number_end)))
+                local num = tonumber(string.sub(line, number_start, number_end))
+                table.insert(numbers, { number = num, start_col = number_start, row = line_number, end_col = number_end })
             end
             number_start = nil
             number_end = nil
-            is_adjacent = false
+            if isSymbol(current_char) then
+                table.insert(symbols, { symbol = current_char, col = j, row = line_number })
+            end
         end
     end
-    if (number_start ~= nil) and is_adjacent then
+    if (number_start ~= nil) then
         -- ending a number
-        table.insert(numbers, tonumber(string.sub(current_line, number_start, number_end)))
+        local num = tonumber(string.sub(line, number_start, number_end))
+        table.insert(numbers, { number = num, start_col = number_start, row = line_number, end_col = number_end })
     end
-    return numbers
+    return numbers, symbols
 end
 
-local function adjacent_numbers_in_line(current_line, prev_line, next_line)
-    return matching_numbers_in_line(current_line, prev_line, next_line, has_symbol_as_neighbor)
-end
-
--- Tests
-
-local function test_adjacent_numbers_in_line()
-    local testcases = {
-        { current = '123.456', prev = nil,       next = nil,       expected = {} },
-        { current = '123.456', prev = '+......', next = nil,       expected = { 123 } },
-        { current = '123.456', prev = '.......', next = '......+', expected = { 456 } },
-        { current = '123.456', prev = '+......', next = '.......', expected = { 123 } },
-        { current = '123.456', prev = '+......', next = '......+', expected = { 123, 456 } },
-    }
-    for _, t in ipairs(testcases) do
-        local actual = adjacent_numbers_in_line(t.current, t.prev, t.next)
-        assert(#actual == #t.expected, string.format("Actual: %s, Input: %s ", util.dump(actual), util.dump(t)))
-        for i, n in ipairs(t.expected) do
-            assert(actual[i] == n, string.format("Actual: %s, Input: %s ", util.dump(actual), util.dump(t)))
-        end
-    end
-end
-
-local function adjacent_numbers(lines)
+local function extract_numbers_and_symbols(lines)
     local numbers = {}
-    for i, current_line in ipairs(lines) do
-        local numbers_in_line = adjacent_numbers_in_line(current_line, lines[i - 1], lines[i + 1])
-        for _, v in ipairs(numbers_in_line) do
-            table.insert(numbers, v)
+    local symbols = {}
+    for i, l in ipairs(lines) do
+        local n, s = extract_numbers_and_symbols_from_line(l, i)
+        util.insert_all(numbers, n)
+        util.insert_all(symbols, s)
+    end
+    return numbers, symbols
+end
+
+local function test_extract_numbers_and_symbols()
+    local testcases = {
+        {
+            input = { '123..456' },
+            expected_symbols = {},
+            expected_numbers = {
+                { number = 123, start_col = 1, end_col = 3, row = 1 },
+                { number = 456, start_col = 6, end_col = 8, row = 1 } }
+        },
+        {
+            input = { '123..456', '$23..*#1' },
+            expected_symbols = {
+                { symbol = '$', row = 2, col = 1 },
+                { symbol = '*', row = 2, col = 6 },
+                { symbol = '#', row = 2, col = 7 },
+            },
+            expected_numbers = {
+                { number = 123, start_col = 1, end_col = 3, row = 1 },
+                { number = 456, start_col = 6, end_col = 8, row = 1 },
+                { number = 23,  start_col = 2, end_col = 3, row = 2 },
+                { number = 1,   start_col = 8, end_col = 8, row = 2 },
+            }
+        }
+    }
+
+    for _, t in ipairs(testcases) do
+        local actual_numbers, actual_symbols = extract_numbers_and_symbols(t.input)
+
+        assert(#actual_numbers == #t.expected_numbers,
+            string.format("Actual: %s, Input: %s ", util.dump(actual_numbers), util.dump(t)))
+        for i, n in ipairs(t.expected_numbers) do
+            assert(actual_numbers[i].number == n.number,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_numbers), util.dump(t)))
+            assert(actual_numbers[i].start_col == n.start_col,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_numbers), util.dump(t)))
+            assert(actual_numbers[i].end_col == n.end_col,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_numbers), util.dump(t)))
+            assert(actual_numbers[i].row == n.row,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_numbers), util.dump(t)))
+        end
+        assert(#actual_symbols == #t.expected_symbols,
+            string.format("Actual: %s, Input: %s ", util.dump(actual_symbols), util.dump(t)))
+        for i, n in ipairs(t.expected_symbols) do
+            assert(actual_symbols[i].symbol == n.symbol,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_symbols), util.dump(t)))
+            assert(actual_symbols[i].col == n.col,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_symbols), util.dump(t)))
+            assert(actual_symbols[i].row == n.row,
+                string.format("Actual: %s, Input: %s ", util.dump(actual_symbols), util.dump(t)))
         end
     end
-    return numbers
 end
 
--- Test
+local function is_adjacent_to_number(number, row, col)
+    local row_in_range = (row >= number.row - 1) and (row <= number.row + 1)
+    local col_in_range = (col >= number.start_col - 1) and (col <= number.end_col + 1)
+    return row_in_range and col_in_range
+end
 
-local test_input = {
-    "467..114..",
-    "...*......",
-    "..35..633.",
-    "......#...",
-    "617*......",
-    ".....+.58.",
-    "..592.....",
-    "......755.",
-    "...$.*....",
-    ".664.598..",
-}
-
-local function test_adjacent_numbers()
-    local actual = adjacent_numbers(test_input)
-    local expected = { 467, 35, 633, 617, 592, 755, 664, 598 }
-    assert(#expected == #actual, util.dump(actual))
-    for i, v in ipairs(expected) do
-        assert(actual[i] == v)
+local function test_is_adjacent_to_number()
+    local test_cases = {
+        { input = { num = { number = 123, start_col = 2, end_col = 4, row = 2 }, row = 1, col = 1 }, expected = true },
+        { input = { num = { number = 23, start_col = 3, end_col = 4, row = 2 }, row = 1, col = 1 }, expected = false },
+        { input = { num = { number = 23, start_col = 3, end_col = 4, row = 2 }, row = 3, col = 2 }, expected = true },
+        { input = { num = { number = 23, start_col = 3, end_col = 4, row = 2 }, row = 2, col = 5 }, expected = true },
+        { input = { num = { number = 23, start_col = 3, end_col = 4, row = 2 }, row = 2, col = 6 }, expected = false },
+    }
+    for _,v in ipairs(test_cases) do
+        local actual = is_adjacent_to_number(v.input.num, v.input.row, v.input.col)
+        assert(actual == v.expected, util.dump(v))
     end
 end
 
-local function part1()
+local function input_as_table()
     local lines = {}
     for l in io.lines(arg[1]) do
         table.insert(lines, l)
     end
-    return fun.reduce(adjacent_numbers(lines), fun.sum, 0)
+    return lines
+end
+
+local function part1()
+    local lines = input_as_table()
+    local numbers,symbols = extract_numbers_and_symbols(lines)
+    local result = 0
+    for _,n in ipairs(numbers) do
+        for _,s in ipairs(symbols) do
+            if is_adjacent_to_number(n, s.row, s.col) then
+                result = result + n.number
+                break
+            end
+        end
+    end
+    return result
 end
 
 local p1 = part1()
 print(p1)
 assert(p1 == 517021)
 
+local function part2()
+    local lines = input_as_table()
+    local numbers,symbols = extract_numbers_and_symbols(lines)
+    local stars = fun.filter(symbols, function(s) return isStar(s.symbol) end)
+    local result = 0
+    for _,s in ipairs(stars) do
+        local adjacent_numbers = {}
+        for _,n in ipairs(numbers) do
+            if is_adjacent_to_number(n, s.row, s.col) then
+                table.insert(adjacent_numbers, n.number)
+            end
+        end
+        if #adjacent_numbers == 2 then
+            result = result + (adjacent_numbers[1] * adjacent_numbers[2])
+        end
+    end
+    return result
+end
+
+local p2 = part2()
+print(p2)
+assert(p2 == 81296995)
+
 test_is_symbol()
 test_is_point()
 test_is_digit()
-test_has_symbol_as_neighbor()
-test_adjacent_numbers_in_line()
-test_adjacent_numbers()
+test_extract_numbers_and_symbols()
+test_is_adjacent_to_number()
