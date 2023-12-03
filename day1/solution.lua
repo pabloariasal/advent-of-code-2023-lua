@@ -65,8 +65,8 @@ function part2()
 end
 
 local p2 = part2()
-print("Part 2:" .. p2)
-assert(55607 == p2)
+print("Part 2: " .. p2)
+assert(55291 == p2)
 
 -- Tests
 local testcases = {

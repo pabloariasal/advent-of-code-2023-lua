@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in {1..24}; do
+    if [ -d "day${i}" ]; then
+        echo "== Day $i =="
+        ./run "day${i}"
+    fi
+done

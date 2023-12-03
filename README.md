@@ -3,6 +3,13 @@ My solutions to Advent of Code. This time in Lua.
 
 # Running
 
+## Single Day
+
 ```sh
-    ./run dayXY
+./run dayXY
+```
+
+## Everything
+```sh
+./run_all
 ```

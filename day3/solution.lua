@@ -209,7 +209,7 @@ local function part1()
 end
 
 local p1 = part1()
-print(p1)
+print('Part 1: ' .. p1)
 assert(p1 == 517021)
 
 local function part2()
@@ -232,7 +232,7 @@ local function part2()
 end
 
 local p2 = part2()
-print(p2)
+print('Part 2: ' .. p2)
 assert(p2 == 81296995)
 
 test_is_symbol()
