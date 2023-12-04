@@ -1,9 +1,10 @@
-local util = require 'util'
 local fun = require 'functional'
 
-local function part1()
+local M = {}
+
+function M.part1(input_file)
    local codes = { }
-   local lines = io.lines(arg[1])
+   local lines = io.lines(input_file)
    for l in lines do
       local rev = string.reverse(l)
 
@@ -17,10 +18,6 @@ local function part1()
    end
    return fun.reduce(codes, fun.sum, 0)
 end
-
-local p1 = part1()
-print("Part 1: " .. p1)
-assert(55607 == p1)
 
 local nums = {['one'] = 1,
    ['two'] = 2,
@@ -51,35 +48,20 @@ local function get_numbers(line)
    return numbers
 end
 
-local function calibration_sum(line)
+function M.calibration_sum(line)
    local n = get_numbers(line)
    return tonumber(n[1] .. n[#n])
 end
 
-function part2()
+function M.part2(input_file)
    local sum = 0
-   for l in io.lines(arg[1]) do
-      sum = sum + calibration_sum(l)
+   for l in io.lines(input_file) do
+      sum = sum + M.calibration_sum(l)
    end
    return sum
 end
 
-local p2 = part2()
-print("Part 2: " .. p2)
-assert(55291 == p2)
+M.solution_part1 = 55607
+M.solution_part2 = 55291
 
--- Tests
-local testcases = {
-   {input = "two1nine", expected = 29},
-   {input = "eightwothree", expected = 83},
-   {input = "abcone2threexyz", expected = 13},
-   {input = "xtwone3four", expected = 24},
-   {input = "4nineeightseven2", expected = 42},
-   {input = "zoneight234", expected = 14},
-   {input = "7pqrstsixteen", expected = 76},
-}
-
-for _, t in ipairs(testcases) do
-   local actual = calibration_sum(t.input)
-   assert(actual == t.expected, (string.format('Input: %s Expected: %s Actual: %s', t.input, t.expected, actual)))
-end
+return M

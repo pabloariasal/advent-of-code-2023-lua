@@ -1,18 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env lua
 
-if [ "$#" -eq 0 ]; then
-    echo "usage: run <dayXY> [options]"
-    exit 1
-fi
+local day = arg[1]
+local input_file = day .. '/input.txt'
 
-day="$1"
-shift
-lua_args="$@"
+package.path = package.path .. ';lib/?.lua' .. string.format(';%s/?.lua', day)
+local s = require('solution')
 
-export LUA_PATH="lib/?.lua;;"
+local p1 = s.part1(input_file)
+print('Part 1: ' .. p1)
+assert(p1 == s.solution_part1)
 
-if [ -z "$lua_args" ]; then
-    lua "${day}/solution.lua" "${day}/input.txt"
-else
-    lua "$lua_args" -- "${day}/solution.lua" "${day}/input.txt"
-fi
+local p2 = s.part2(input_file)
+print('Part 2: ' .. p2)
+assert(p2 == s.solution_part2)

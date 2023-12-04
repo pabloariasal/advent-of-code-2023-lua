@@ -1,8 +1,21 @@
 #!/bin/bash
 
+run_tests=false
+
+if [ "$#" -gt 0 ]; then
+    if [ "$1" = "--run-tests" ]; then
+        run_tests=true
+    else
+        echo "Usage: ./run_all [--run-tests]"
+    fi
+fi
+
 for i in {1..24}; do
     if [ -d "day${i}" ]; then
         echo "== Day $i =="
         ./run "day${i}"
+        if [ "$run_tests" = true ]; then
+            ./run_test "day${i}"
+        fi
     fi
 done

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: run_test <dayXY> [options]"
+    exit 1
+fi
+
+day="$1"
+shift
+extra_args="$@"
+
+export LUA_PATH="lib/?.lua;${day}/?.lua;;"
+
+test_file="${day}/test.lua"
+if [ ! -e $test_file ]; then
+    exit 0
+fi
+
+if [ -z "$extra_args" ]; then
+    lua "$test_file"
+else
+    lua "$test_file" "$extra_args"
+fi
