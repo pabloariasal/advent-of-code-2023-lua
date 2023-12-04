@@ -38,4 +38,16 @@ function M.is_in_list(l, e)
    return false
 end
 
+function M.are_lists_equal(l1, l2)
+   if #l1 ~= #l2 then
+      return false
+   end
+   for i,v in ipairs(l1) do
+      if v ~= l2[i] then
+         return false
+      end
+   end
+   return true
+end
+
 return M
