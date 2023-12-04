@@ -21,4 +21,21 @@ function M.insert_all(t, l)
    return result
 end
 
+function M.insert_all_it(t, it)
+   local result = t
+   for v in it do
+      table.insert(result, v)
+   end
+   return result
+end
+
+function M.is_in_list(l, e)
+   for i=1,#l do
+      if l[i] == e then
+         return true
+      end
+   end
+   return false
+end
+
 return M
