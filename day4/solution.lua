@@ -93,12 +93,6 @@ local p1 = part1()
 print('Part 1: ' .. p1)
 assert(p1 == 24706)
 
-local function create_copies(game)
-    local copies = {}
-    local num_matches = #get_matches(game)
-
-end
-
 local function part2()
     local all_cards = {}
 
