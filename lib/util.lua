@@ -50,4 +50,12 @@ function M.are_lists_equal(l1, l2)
    return true
 end
 
+function M.range(f, t, s)
+   local result = {}
+   for i=f,t,(s or 1) do
+      table.insert(result, i)
+   end
+   return result
+end
+
 return M

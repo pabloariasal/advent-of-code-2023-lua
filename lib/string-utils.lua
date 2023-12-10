@@ -11,4 +11,8 @@ function M.split_string(inputstr, sep)
     return t
 end
 
+function M.lines(inputstr)
+    return M.split_string(inputstr, '\n')
+end
+
 return M
