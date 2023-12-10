@@ -49,7 +49,7 @@ function M.get_possible_wins_per_race(race)
 end
 
 function M.part1(input_file)
-    local input = fu.read_file(input_file)
+    local input = fu.read_file_to_string(input_file)
     local races = M.parse_races(input)
     local result = 1
     for _, r in ipairs(races) do
@@ -59,7 +59,7 @@ function M.part1(input_file)
 end
 
 function M.part2(input_file)
-    local input = fu.read_file(input_file)
+    local input = fu.read_file_to_string(input_file)
     local races = M.parse_races(input)
     local race = M.flatten(races)
     local lower = math.ceil(race.time - math.sqrt(race.time * race.time - 4 * race.distance)) / 2

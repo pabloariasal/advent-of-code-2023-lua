@@ -1,5 +1,6 @@
 local util = require 'util'
 local fun = require 'functional'
+local inspect = require 'inspect'
 
 local M = {}
 
@@ -24,7 +25,7 @@ function M.parse_game(game_str)
 end
 
 function M.get_matches(game)
-    assert(#game.picks >= #game.winnings, util.dump(game))
+    assert(#game.picks >= #game.winnings, inspect(game))
     local matches = {}
     for i=1,#game.picks do
         if util.is_in_list(game.winnings, game.picks[i]) then

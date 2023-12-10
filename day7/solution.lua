@@ -186,6 +186,6 @@ function M.part2(input_file)
 end
 
 M.solution_part1 = 253205868
-M.solution_part2 = 0
+M.solution_part2 = 253907829
 
 return M

@@ -1,6 +1,7 @@
 local s = require('solution')
 local lu = require('luaunit')
 local util = require('util')
+local inspect = require 'inspect'
 
 function test_is_digit()
     local testcases = {
@@ -12,7 +13,7 @@ function test_is_digit()
     }
     for _, v in ipairs(testcases) do
         local actual = s.isDigit(v.input)
-        lu.assertEquals(actual, v.expected, util.dump(v))
+        lu.assertEquals(actual, v.expected, inspect(v))
     end
 end
 
@@ -26,7 +27,7 @@ function test_is_point()
     }
     for _, v in ipairs(testcases) do
         local actual = s.isPoint(v.input)
-        lu.assertEquals(actual, v.expected, util.dump(v))
+        lu.assertEquals(actual, v.expected, inspect(v))
     end
 end
 
@@ -41,10 +42,8 @@ function test_is_symbol()
     }
     for _, v in ipairs(testcases) do
         local actual = s.isSymbol(v.input)
-        lu.assertEquals(actual, v.expected, util.dump(v))
+        lu.assertEquals(actual, v.expected, inspect(v))
     end
 end
-
-
 
 os.exit( lu.LuaUnit.run() )

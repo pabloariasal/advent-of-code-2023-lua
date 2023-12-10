@@ -1,6 +1,6 @@
 local M = {}
 
-function M.read_file(input_file)
+function M.read_file_to_string(input_file)
     local file = io.open(input_file, 'r')
     if not file then
         return nil

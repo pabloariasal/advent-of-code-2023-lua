@@ -73,7 +73,7 @@ local function find_min(list)
 end
 
 function M.part1(input_file)
-    local contents = fu.read_file(input_file)
+    local contents = fu.read_file_to_string(input_file)
     local seeds = M.parse_seeds(contents)
     local maps = M.parse_maps(contents)
     local locations = fun.map(seeds,
@@ -83,7 +83,7 @@ end
 
 function M.part2(input_file)
     return 0
-    -- local contents = fu.read_file(input_file)
+    -- local contents = fu.read_file_to_string(input_file)
     -- local seeds = M.parse_seeds(contents)
     -- local maps = M.parse_maps(contents)
     -- local min_location = nil
