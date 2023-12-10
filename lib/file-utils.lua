@@ -10,4 +10,14 @@ function M.read_file(input_file)
     return contents
 end
 
+function M.parse_line(input_file, parse)
+    local it = io.lines(input_file)
+    return function()
+        local next = it()
+        if next ~= nil then
+            return parse(next)
+        end
+    end
+end
+
 return M
